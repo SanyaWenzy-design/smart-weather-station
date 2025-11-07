@@ -25,7 +25,7 @@ My first IoT project - a smart weather station that monitors temperature and hum
 ## 🔧 Installation & Usage
 `bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/smart-weather-station.git
+git clone https://github.com/Oleksandr_Derbenov/smart-weather-station.git
 
 # Navigate to project directory
 cd smart-weather-station
