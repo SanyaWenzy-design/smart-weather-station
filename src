@@ -1,0 +1,80 @@
+import time
+import board
+import adafruit_dht
+import smbus2
+import RPi.GPIO as GPIO
+
+I2C_ADDR = 0x27 # Regarding the screen and pins, change them to ones that suit you.
+BUZZER_PIN = 17
+TEMP_LIMIT = 30
+READ_INTERVAL = 2
+
+bus = smbus2.SMBus(1)
+dht = adafruit_dht.DHT11(board.D21)
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(BUZZER_PIN, GPIO.OUT)
+buzzer = GPIO.PWM(BUZZER_PIN, 1000)
+
+def lcd_write(cmd, mode=0):
+    high = mode | (cmd & 0xF0) | 0x08
+    low = mode | ((cmd << 4) & 0xF0) | 0x08
+    bus.write_byte(I2C_ADDR, high | 0x04)
+    bus.write_byte(I2C_ADDR, high)
+    bus.write_byte(I2C_ADDR, low | 0x04)
+    bus.write_byte(I2C_ADDR, low)
+
+def lcd_init():
+    for cmd in (0x33, 0x32, 0x28, 0x0C, 0x06, 0x01):
+        lcd_write(cmd)
+        time.sleep(0.002)
+
+def lcd_string(text, line=0):
+    lcd_write(0x80 + 0x40 * line)
+    s = str(text)[:16].ljust(16)
+    for ch in s:
+        lcd_write(ord(ch), 1)
+
+lcd_init()
+
+try:
+    while True:
+        try:
+            temp = dht.temperature
+            hum = dht.humidity
+
+            if temp is not None and hum is not None:
+                lcd_string(f"Temp: {temp:>5.1f}C", 0)
+                lcd_string(f"Hum:  {hum:>5.1f}%", 1)
+
+                if temp >= TEMP_LIMIT:
+                    lcd_string("!!! HOT !!!", 0)
+                    buzzer.start(90)
+                    time.sleep(1)
+                    buzzer.stop()
+                    time.sleep(1)
+                else:
+                    buzzer.stop()
+                    time.sleep(READ_INTERVAL)
+            else:
+                lcd_string("No data", 0)
+                lcd_string("", 1)
+                buzzer.stop()
+                time.sleep(READ_INTERVAL)
+
+        except RuntimeError:
+            lcd_string("Sensor error", 0)
+            lcd_string("", 1)
+            buzzer.stop()
+            time.sleep(READ_INTERVAL)
+
+except KeyboardInterrupt:
+    pass
+finally:
+    buzzer.stop()
+    GPIO.cleanup()
+    try:
+        dht.exit()
+    except Exception:
+        pass
+    lcd_write(0x01)
