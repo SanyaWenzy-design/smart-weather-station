@@ -30,5 +30,9 @@ git clone https://github.com/SanyaWenzy-design/smart-weather-station.git
 # Navigate to project directory
 cd smart-weather-station
 
-# Run the application
-python src/main.py
+# Project Photos
+![Wiring Setup](photos/photo_5796445626433211475_y.jpg)
+Complete connection diagram with labeled components.
+
+![Device Working]()
+Real-time temperature and humidity display.
