@@ -34,5 +34,5 @@ cd smart-weather-station
 ![Wiring Setup](photos/photo_5796445626433211475_y.jpg)
 Complete connection diagram with labeled components.
 
-![Device Working]()
+![Device Working](photos/photo_5796445626433211476_y.jpg)
 Real-time temperature and humidity display.
